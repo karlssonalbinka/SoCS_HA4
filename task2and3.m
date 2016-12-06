@@ -44,10 +44,10 @@ gplot(A, XY')
 clc
 clear all
 
-nFinal = 100;       %nbr of nodes in the end
-nInitial = 7;       %nbr of nodes in beginning
+nFinal = 5000;       %nbr of nodes in the end
+nInitial = 20;       %nbr of nodes in beginning
 p = 0.5;            %randoming out initial condition
-m = 4;              %nbr of new modes every time step
+m = 5;              %nbr of new modes every time step
 nbrTimesteps = floor(nFinal-nInitial);
 degree = zeros(1, nFinal);
 
@@ -61,18 +61,22 @@ A = sparse(nFinal,nFinal);
 x = 1:nInitial;
 y = 1:nInitial;
 for i = 1:nInitial
-    randCoord = (rand(1,nInitial) < p);
-    coordX = x(randCoord);
+    randCoord = (rand(1,i) < p);
+    coordX(1:i) = x(i);
     coordY = y(randCoord);
     A(coordX', coordY') = 1;
 end
+A = A+A';   %make symmetric
 
 figure(1)
 gplot(A, XY(:, 1:nInitial)', '*-')
+title('Initial configuration')
+xlabel(['N_{initial} = ' num2str(nInitial)])
 
 % newEdges_x = zeros(1, m*nbrTimesteps);
 % newEdges_y = zeros(1, m*nbrTimesteps);
 allNewNodes = zeros(2, m*nbrTimesteps);
+tic
 for i_timestep = 1:nbrTimesteps
     i_timestep
 
@@ -97,13 +101,42 @@ for i_timestep = 1:nbrTimesteps
         end
         newNodes(i) = newNode;
     end
-
     A(i_timestep + nInitial, newNodes) = 1;
+    A(newNodes, i_timestep + nInitial) = 1;
 end
-
 
 figure(2)
 gplot(A, XY', '*-')
+title('Final configuration')
+xlabel(['N_{final} = ' num2str(nFinal) ', m = ' num2str(m)])
+% a=full(sum(A,2))
+%%
+%Create and plot power law
+clc
+distr = full(sum(A,2));
 
+%create histogram distribution
+for i = 1:nFinal
+    x(i) = sum(distr == i);
+end
+x2 = x/max(x);
+x = sort(x)/max(x);
 
+k = [nFinal:-1:1]./nFinal;
+figure(1)
+loglog(x,k)
+hold on
 
+F = 2*m^2.*k.^(-2);
+F2 = F/max(F);
+F = sort(F./max(F));
+
+loglog(F,k,'r')
+title('power law')
+xlabel(['N_{final} = ' num2str(nFinal) ', m = ' num2str(m)])
+legend('simulation', 'theoretical');
+
+figure(2)
+plot(x2, 'b');
+hold on
+plot(F2(end:-1:1), 'r')
