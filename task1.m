@@ -4,30 +4,45 @@ clear all
 clc
 
 %task 1 - Erdos-Reniy model
-N = 20;         %nbr of nodes
+N = 200;         %nbr of nodes
 p = 0.3;        %probability of connecting nodes
 k = 1:N;
-diag = [k', k'];
 A = sparse(N,N); %ajacancy matrix
 randConnections = rand(1,N*N);
-A(randConnections > p) = 1;
-A(diag) = 0;
+A(randConnections < p) = 1;
+%empty bottom half of adjacancy matrix to get right number of edges
+for i = 1:N
+    A(i,1:i) = 0;
+end
+A = A+A';       % make symmetric (undirected graph)
+full(sum(sum(A),2))/2   %divided by two because there are two contributions from each edge (symmetric)
+p*N*(N-1)/2
 
-%Crate circular points
+
+%Create circular points
 angleStep = 2*pi/N;
 coordinates = [cos(angleStep*k); sin(angleStep*k)];
 
-% plot(coordinates(1,:), coordinates(2,:), 'r*')
-
-% [X, Y] = find(A == 1);
-% XY = [Y, X];
-% k = 1:N*N;
 gplot(A, coordinates')
 
-%%
-clear all
-clc
-% k = 1:30;
-[B,XY] = bucky;
-gplot(B,XY,'-*')
-axis square
+%Distribution
+distr = full(sum(A,2));
+%theoretical distribution
+kMin = 20;
+kMax = 100;
+k = kMin:kMax;
+P = zeros(1,kMax-kMin+1);
+% P = factorial(N-1)./factorial(k)*p.^k*(1-p).^(N-1-k);
+for k =kMin:kMax
+    top = prod(N-1-k:N-1);
+    bottom = prod(1:N-1-k);
+    P(k-kMin+1) = top/bottom*p^k * (1-p)^(N-1-k);
+end
+
+hold off
+figure(2)
+hist(distr)
+hold on
+plot([kMin:kMax], P, 'r')
+axis([kMin kMax 0 80])
+% histogram(distr)
