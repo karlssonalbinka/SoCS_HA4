@@ -3,7 +3,12 @@ function [ clusteringCoeff ] = GetClusteringCoef( A )
 % A = adjacency matrix in sparse mode
 
 B = A*A*A;
-nbrTriangles = full(sum( sum(B==3, 2) ));
+
+%divided by three*2 because from each node with a triangle you can go two 
+%directions and this happens at each node of the triangle
+nbrTriangles = trace(B)/6;       
+
+%nbr Triples
 k = full(sum(A,2));
 k = k.*(k-1)/2;
 nbrTriples = sum(k);

@@ -12,8 +12,9 @@ XY = [cos(angleStep*k); sin(angleStep*k)];
 figure(1)
 gplot(A, XY', '*-')
 
-path = GetMaxShortestPath(A)
-avgPath = sum(path)/N   %NOT RIGHT - MAYBE AVG PATH MEANS AVG OF PATH FROM EACH NODE TO EACH NODE AND NOT JUST AVG DIAMETER?
+[path allPath] = GetMaxShortestPath(A, 100);
+avgDiameter = sum(path)/N
+avgPath = sum(sum(allPath),2)/(N*N)   %NOT RIGHT - MAYBE AVG PATH MEANS AVG OF PATH FROM EACH NODE TO EACH NODE AND NOT JUST AVG DIAMETER?
 
 %% Testing
 clc
@@ -34,26 +35,4 @@ axis([0 4 -1 3])
 %While for row two it's enough with adding B + B*B to cover all columns
 %with non zero elements -> max min path = 2. This wors with the picture
 
-% path1 = B
-% path2 = B*B
-% path3 = B*B*B
-% path4 = B*B*B*B
-path = zeros(length(B), 1);
-toCheck = true(1,length(B));
-path(sum(B(toCheck,:) == 0, 2) == 0) = 1;
-toCheck(sum(B(toCheck,:) == 0, 2) == 0) = 0;
-id = 1:length(B);
-C = B;
-D = B;
-i = 0;
-while find(path == 0, 1)
-% while( i < 4)
-    temp_id = id(toCheck);
-    i = i + 1;
-    C = C*B;
-    D = D + C
-    index = temp_id(sum(D(toCheck,:) == 0, 2) == 0);
-    path(index) = i
-    toCheck(index) = 0
-end
-path = path + 1
+[path, path2] = GetMaxShortestPath(B, 100)
