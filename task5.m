@@ -12,18 +12,18 @@ XY = [cos(angleStep*k); sin(angleStep*k)];
 figure(1)
 gplot(A, XY', '*-')
 
-[path allPath] = GetMaxShortestPath(A, 100);
-avgDiameter = sum(path)/N
-avgPath = sum(sum(allPath),2)/(N*N)   %NOT RIGHT - MAYBE AVG PATH MEANS AVG OF PATH FROM EACH NODE TO EACH NODE AND NOT JUST AVG DIAMETER?
+[nodeMax allPath] = GetMaxShortestPath(A, 100);
+avgPath = sum(sum(allPath),2)/(N*(N-1))   %NOT RIGHT - MAYBE AVG PATH MEANS AVG OF PATH FROM EACH NODE TO EACH NODE AND NOT JUST AVG DIAMETER?
 
 %% Testing
 clc
-XY = [1 1 2 3 3; 0 2 1 0 2]; 
-B = [0 1 0 0 0;...  %node 1 - lower left corner
-    1 0 1 0 0; ...  %node 2 - upper left corner
-    0 1 0 1 1;...   %node 3 - center node
-    0 0 1 0 1;...   %node 4 - upper right corner
-    0 0 1 1 0];     %node 5 - lower right corner
+XY = [1 1 2 3 3 4; 0 2 1 0 2 1]; 
+B = [0 1 0 0 0 0;...  %node 1 - lower left corner
+    1 0 1 0 0 0; ...  %node 2 - upper left corner
+    0 1 0 1 1 0;...   %node 3 - center node
+    0 0 1 0 1 1;...   %node 4 - upper right corner
+    0 0 1 1 0 1;...     %node 5 - lower right corner
+    0 0 0 1 1 0];
 gplot(B, XY', '-*')
 axis([0 4 -1 3])
 %Calculate average diameter
@@ -35,4 +35,9 @@ axis([0 4 -1 3])
 %While for row two it's enough with adding B + B*B to cover all columns
 %with non zero elements -> max min path = 2. This wors with the picture
 
-[path, path2] = GetMaxShortestPath(B, 100)
+[nodeMaxLength, allPaths] = GetMaxShortestPath(B, 100)
+
+%% test spare matrix - seems to work!
+sparse_B = sparse(B);
+[sparse_nodeMaxLength, sparse_allPaths] = GetMaxShortestPath(sparse_B, 100)
+
